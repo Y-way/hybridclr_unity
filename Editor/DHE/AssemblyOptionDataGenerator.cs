@@ -30,7 +30,7 @@ namespace HybridCLR.Editor.DHE
 
             public IAssemblyResolver NewAssemblyResolver { get; set; }
 
-            public bool ProxyAOTMethod { get; set; }
+            public bool RedirectAOTMethod { get; set; }
         }
 
         public class AssemblyMeta
@@ -69,7 +69,7 @@ namespace HybridCLR.Editor.DHE
             {
                 TypeCompareCache = _typeCompareCache,
                 DHEAssemblies = options.DifferentialHybridAssembyList,
-                ProxyAOTMethod = options.ProxyAOTMethod,
+                ProxyAOTMethod = options.RedirectAOTMethod,
             });
         }
 
@@ -136,10 +136,16 @@ namespace HybridCLR.Editor.DHE
                 AssemblyMeta data = e.Value;
                 string outOptionFile = $"{_options.OutputDir}/{assName}.dhao.bytes";
 
-                var unchangedStructTokens = new SortedSet<uint>(data.curMoudle.GetTypes().Where(t => t.IsValueType && !t.IsEnum).Select(t => _types[t])
+                // 只需要比较内存布局等价以及虚函数等价，
+                var unchangedStructs = data.curMoudle.GetTypes().Where(t => t.IsValueType && !t.IsEnum).Select(t => _types[t])
                     .Where(t => t.instanceState == TypeCompareState.MemoryLayoutEqual)
-                    .Where(t => t.type.Methods.Where(m => !m.IsStatic).All(m => _methods[m].state == MethodCompareState.Equal))
-                    .Select(t => t.type.MDToken.Raw)).ToList();
+                    .Where(t => _options.RedirectAOTMethod || t.type.Methods.Where(m => m.IsVirtual).All(m => _methods[m].state == MethodCompareState.Equal))
+                    .ToList();
+                //foreach (var t in unchangedStructs)
+                //{
+                //    Debug.Log($"unchange struct:{t.type.FullName} token:{t.type.MDToken.Raw}");
+                //}
+                var unchangedStructTokens =unchangedStructs.Select(s => s.type.MDToken.Raw).ToList();
                 var changedMethodTokens = new SortedSet<uint>(data.methods.Where(m => m.state == MethodCompareState.NotEqual)
                     .Select(m => m.method.MDToken.Raw)).ToList();
                 var dhaOptions = new DifferentialHybridAssemblyOptions()
