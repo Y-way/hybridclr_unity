@@ -392,7 +392,7 @@ namespace HybridCLR.Editor.DHE
             //{
             //    return false;
             //}
-            switch (t1.ElementType)
+            switch (reduceEleType1)
             {
                 case ElementType.Void:
                 case ElementType.Boolean:
