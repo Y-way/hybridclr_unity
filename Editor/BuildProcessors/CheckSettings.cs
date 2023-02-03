@@ -58,6 +58,9 @@ namespace HybridCLR.Editor.BuildProcessors
                 Debug.LogWarning("[CheckSettings] HybridCLRSettings中未配置任何热更新模块");
             }
 
+            string dheAssemblyEnvStr = string.Join(",", gs.differentialHybridAssemblies ?? Array.Empty<string>());
+            Debug.Log($"[CheckSettings] DHE_ASSEMBLIES:{dheAssemblyEnvStr}");
+            Environment.SetEnvironmentVariable("DHE_ASSEMBLIES", dheAssemblyEnvStr);
         }
     }
 }
