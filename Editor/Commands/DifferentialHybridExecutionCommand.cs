@@ -49,7 +49,7 @@ namespace HybridCLR.Editor.Commands
                 OldAssemblyResolver = MetaUtil.CreateAOTAssemblyResolver(target),
                 NewAssemblyResolver = MetaUtil.CreateHotUpdateAndAOTAssemblyResolver(target, SettingsUtil.HotUpdateAssemblyNames.Concat(differentialHybridAssemblyList).ToList()),
                 OutputDir = $"{SettingsUtil.ProjectDir}/{settings.differentialHybridOptionOutputDir}",
-                RedirectAOTMethod = false,
+                RedirectAOTMethod = true,
             };
 
             using (var g = new AssemblyOptionDataGenerator(options))
