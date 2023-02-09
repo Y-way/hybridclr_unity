@@ -22,6 +22,7 @@ namespace HybridCLR.Editor
         private SerializedProperty _patchAOTAssemblies;
         private SerializedProperty _differentialHybridAssemblies;
         private SerializedProperty _differentialHybridOptionOutputDir;
+        private SerializedProperty _dontMarkIndirectlyChangedMethodAsChanged;
         private SerializedProperty _collectAssetReferenceTypes;
         private SerializedProperty _outputLinkFile;
         private SerializedProperty _outputAOTGenericReferenceFile;
@@ -52,6 +53,7 @@ namespace HybridCLR.Editor
             _patchAOTAssemblies = _serializedObject.FindProperty("patchAOTAssemblies");
             _differentialHybridAssemblies = _serializedObject.FindProperty("differentialHybridAssemblies");
             _differentialHybridOptionOutputDir = _serializedObject.FindProperty("differentialHybridOptionOutputDir");
+            _dontMarkIndirectlyChangedMethodAsChanged = _serializedObject.FindProperty("dontMarkIndirectlyChangedMethodAsChanged");
             _collectAssetReferenceTypes = _serializedObject.FindProperty("collectAssetReferenceTypes");
             _outputLinkFile = _serializedObject.FindProperty("outputLinkFile");
             _outputAOTGenericReferenceFile = _serializedObject.FindProperty("outputAOTGenericReferenceFile");
@@ -143,6 +145,7 @@ namespace HybridCLR.Editor
                 EditorGUILayout.PropertyField(_patchAOTAssemblies);
                 EditorGUILayout.PropertyField(_differentialHybridAssemblies);
                 EditorGUILayout.PropertyField(_differentialHybridOptionOutputDir);
+                EditorGUILayout.PropertyField(_dontMarkIndirectlyChangedMethodAsChanged);
                 EditorGUILayout.PropertyField(_collectAssetReferenceTypes);
                 EditorGUILayout.PropertyField(_outputLinkFile);
                 EditorGUILayout.PropertyField(_outputAOTGenericReferenceFile);

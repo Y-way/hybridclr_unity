@@ -86,10 +86,10 @@ namespace HybridCLR.Editor.DHE
             {
                 return false;
             }
-            if (t1.IsClass ^ t2.IsClass)
-            {
-                return false;
-            }
+            //if (t1.IsClass ^ t2.IsClass)
+            //{
+            //    return false;
+            //}
             if (t1.IsInterface ^ t2.IsInterface)
             {
                 return false;
@@ -120,6 +120,7 @@ namespace HybridCLR.Editor.DHE
                 t2 = t2.ResolveTypeDefThrow();
             }
             
+            
             if (t1 is TypeDef td1 && t2 is TypeDef td2)
             {
                 //Debug.Log($"CompareTypeLayout 2 {t1} {t2}");
@@ -131,11 +132,8 @@ namespace HybridCLR.Editor.DHE
                 {
                     return td1.GetEnumUnderlyingType().ElementType == td2.GetEnumUnderlyingType().ElementType;
                 }
-                if (td1.IsClass)
-                {
-                    return TryGetOrComputeAddCompare(td1, td2, CompareClassLayout);
-                }
-                return TryGetOrComputeAddCompare(td1, td2, CompareValueTypeLayout);
+                return td1.IsValueType ? TryGetOrComputeAddCompare(td1, td2, CompareValueTypeLayout)
+                    : TryGetOrComputeAddCompare(td1, td2, CompareClassLayout);
             }
             if (t1 is TypeSpec ts1 && t2 is TypeSpec ts2)
             {
@@ -157,16 +155,6 @@ namespace HybridCLR.Editor.DHE
                 {
                     return gt1.GetEnumUnderlyingType().ElementType == gt2.GetEnumUnderlyingType().ElementType;
                 }
-                if (gt1.IsClass)
-                {
-                    if (TryGetCacheCompareResult(t1, t2, out var ret))
-                    {
-                        return ret;
-                    }
-                    ret = CompareGenericInstClassLayout(gis1, gis2);
-                    AddCacheCompareResult(t1, t2, ret);
-                    return ret;
-                }
 
                 if (gt1.IsValueType)
                 {
@@ -175,6 +163,16 @@ namespace HybridCLR.Editor.DHE
                         return ret;
                     }
                     ret = CompareGenericInstValueTypeLayout(gis1, gis2);
+                    AddCacheCompareResult(t1, t2, ret);
+                    return ret;
+                }
+                else
+                {
+                    if (TryGetCacheCompareResult(t1, t2, out var ret))
+                    {
+                        return ret;
+                    }
+                    ret = CompareGenericInstClassLayout(gis1, gis2);
                     AddCacheCompareResult(t1, t2, ret);
                     return ret;
                 }
@@ -358,7 +356,7 @@ namespace HybridCLR.Editor.DHE
                 {
                     GenericInstSig gis1 = t.ToGenericInstSig();
                     TypeDef gt1 = gis1.GenericType.TypeDefOrRef.ResolveTypeDef();
-                    return gt1.IsClass ? obj : et;
+                    return gt1.IsValueType ? et : obj;
                 }
                 case ElementType.TypedByRef: return et;
                 case ElementType.ValueArray: throw new NotSupportedException();
@@ -435,11 +433,11 @@ namespace HybridCLR.Editor.DHE
                     {
                         Debug.Log($"GenericType is null. {t1}, {t2}, {gt1}, {gt2}");
                     }
-                    if (gt1.IsClass)
+                    if (!gt1.IsValueType)
                     {
-                        return gt2.IsClass;
+                        return !gt2.IsValueType;
                     }
-                    if (gt2.IsClass)
+                    if (!gt2.IsValueType)
                     {
                         return false;
                     }

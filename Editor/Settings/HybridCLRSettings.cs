@@ -44,6 +44,9 @@ namespace HybridCLR.Editor
         [Header("差分混合热更新配置数据输出目录")]
         public string differentialHybridOptionOutputDir = "HybridCLRData/DifferentialHybridOptionDatas";
 
+        [Header("间接函数变化不标记为变化")]
+        public bool dontMarkIndirectlyChangedMethodAsChanged;
+
         [Header("生成link.xml时扫描asset中引用的类型")]
         public bool collectAssetReferenceTypes;
 
