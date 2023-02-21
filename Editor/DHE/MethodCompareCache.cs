@@ -168,7 +168,7 @@ namespace HybridCLR.Editor.DHE
             }
         }
 
-        public void AddCompareMethod(MethodDef m1, MethodDef m2)
+        public MethodCompareData AddCompareMethod(MethodDef m1, MethodDef m2)
         {
             var data = GetOrInitMethod(m1);
             if (data.state == MethodCompareState.NotCompared)
@@ -177,6 +177,7 @@ namespace HybridCLR.Editor.DHE
                 CompareMethodImplements(data);
             }
             //Debug.Log($"=== AddCompareMethod m1:{m1} m2:{m2}");
+            return data;
         }
 
         public bool CompareMethodFinal(MethodDef m1, MethodDef m2)
@@ -204,14 +205,60 @@ namespace HybridCLR.Editor.DHE
             return TypeEqualityComparer.Instance.Equals(t1, t2) && _typeCompareCache.CompareTypeLayout(t1, t2);
         }
 
-        private bool CompareField(IField f1, IField f2)
+        TypeDef TryGetTypeDefOrGenericType(ITypeDefOrRef t)
+        {
+            TypeDef td = t.ResolveTypeDef();
+            if (td != null)
+            {
+                return td;
+            }
+            GenericInstSig gis = t.TryGetGenericInstSig();
+            return gis != null ? gis.GenericType.TypeDef : null;
+        }
+
+        private bool CompareField(IField f1, IField f2, MethodCompareData caller)
         {
             Debug.Assert(f1.IsField && f2.IsField);
-            if (!_typeCompareCache.CompareTypeLayout(f1.DeclaringType, f2.DeclaringType))
+            ITypeDefOrRef t1 = f1.DeclaringType;
+            ITypeDefOrRef t2 = f2.DeclaringType;
+            if (!_typeCompareCache.CompareTypeLayout(t1, t2))
             {
                 return false;
             }
-            return f1.Name == f2.Name;
+            if (f1.Name != f2.Name)
+            {
+                return false;
+            }
+            FieldDef fd1 = f1.ResolveFieldDef();
+            FieldDef fd2 = f2.ResolveFieldDef();
+            if (fd1.IsStatic ^ fd2.IsStatic)
+            {
+                return false;
+            }
+            if (fd1.IsStatic)
+            {
+                TypeDef td1 = TryGetTypeDefOrGenericType(t1);
+                if (td1 != null)
+                {
+                    TypeDef td2 = TryGetTypeDefOrGenericType(t2);
+                    MethodDef staticCtor1 = td1.FindStaticConstructor();
+                    MethodDef staticCtor2 = td2.FindStaticConstructor();
+                    if (staticCtor1 != null)
+                    {
+                        if (staticCtor2 == null)
+                        {
+                            return false;
+                        }
+                        return CompareMethodDefInternal(staticCtor1, staticCtor2, caller);
+                    }
+                    else
+                    {
+                        return staticCtor2 == null;
+                    }
+                }
+                return true;
+            }
+            return true;
         }
 
         private bool IsDHEModule(ModuleDef module)
@@ -614,7 +661,7 @@ namespace HybridCLR.Editor.DHE
                 case OperandType.ShortInlineBrTarget:
                     return ((Instruction)op1).Offset == ((Instruction)op2).Offset;
                 case OperandType.InlineField:
-                    return CompareField((IField)op1, (IField)op2);
+                    return CompareField((IField)op1, (IField)op2, method);
                 case OperandType.InlineMethod:
                 {
                     if (code1 == Code.Callvirt || code1 == Code.Ldvirtftn)
