@@ -68,7 +68,7 @@ namespace HybridCLR.Editor.DHE
             return ret;
         }
 
-        private bool IsSameTypeFamily(TypeDef t1, TypeDef t2)
+        private bool IsSameTypeAttrs(TypeDef t1, TypeDef t2)
         {
             //if (t1 == null)
             //{
@@ -91,6 +91,14 @@ namespace HybridCLR.Editor.DHE
             //    return false;
             //}
             if (t1.IsInterface ^ t2.IsInterface)
+            {
+                return false;
+            }
+            if (t1.IsAbstract ^ t2.IsAbstract)
+            {
+                return false;
+            }
+            if (t1.IsSealed ^ t2.IsSealed)
             {
                 return false;
             }
@@ -124,7 +132,7 @@ namespace HybridCLR.Editor.DHE
             if (t1 is TypeDef td1 && t2 is TypeDef td2)
             {
                 //Debug.Log($"CompareTypeLayout 2 {t1} {t2}");
-                if (!IsSameTypeFamily(td1, td2))
+                if (!IsSameTypeAttrs(td1, td2))
                 {
                     return false;
                 }
@@ -147,7 +155,7 @@ namespace HybridCLR.Editor.DHE
 
                 TypeDef gt1 = gis1.GenericType.TypeDefOrRef.ResolveTypeDef();
                 TypeDef gt2 = gis2.GenericType.TypeDefOrRef.ResolveTypeDef();
-                if (!IsSameTypeFamily(gt1, gt2))
+                if (!IsSameTypeAttrs(gt1, gt2))
                 {
                     return false;
                 }

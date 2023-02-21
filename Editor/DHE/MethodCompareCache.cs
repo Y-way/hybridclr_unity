@@ -194,9 +194,14 @@ namespace HybridCLR.Editor.DHE
             return _typeCompareCache.CompareFieldOrParamOrVariableType(t1.ToTypeSig(), t2.ToTypeSig());
         }
 
-        private bool CompareEqualTypeAndMemoryLayout(ITypeDefOrRef t1, ITypeDefOrRef t2)
+        private bool CompareEqualTypeAndLocationLayout(ITypeDefOrRef t1, ITypeDefOrRef t2)
         {
             return TypeEqualityComparer.Instance.Equals(t1, t2) && _typeCompareCache.CompareFieldOrParamOrVariableType(t1.ToTypeSig(), t2.ToTypeSig());
+        }
+
+        private bool CompareEqualTypeLayout(ITypeDefOrRef t1, ITypeDefOrRef t2)
+        {
+            return TypeEqualityComparer.Instance.Equals(t1, t2) && _typeCompareCache.CompareTypeLayout(t1, t2);
         }
 
         private bool CompareField(IField f1, IField f2)
@@ -648,9 +653,13 @@ namespace HybridCLR.Editor.DHE
                     {
                         return IsLocationLayoutEqual((ITypeDefOrRef)op1, (ITypeDefOrRef)op2);
                     }
+                    if (code1 == Code.Isinst || code1 == Code.Castclass)
+                    {
+                        return CompareEqualTypeLayout((ITypeDefOrRef)op1, (ITypeDefOrRef)op2);
+                    }
                     else
                     {
-                        return CompareEqualTypeAndMemoryLayout((ITypeDefOrRef)op1, (ITypeDefOrRef)op2);
+                        return CompareEqualTypeAndLocationLayout((ITypeDefOrRef)op1, (ITypeDefOrRef)op2);
                     }
                 }
                 //case OperandType.InlinePhi:
