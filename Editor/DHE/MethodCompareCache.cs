@@ -249,7 +249,7 @@ namespace HybridCLR.Editor.DHE
                         {
                             return false;
                         }
-                        return CompareMethodDefInternal(staticCtor1, staticCtor2, caller);
+                        return _proxyAOTMethod || CompareMethodDefInternal(staticCtor1, staticCtor2, caller);
                     }
                     else
                     {
