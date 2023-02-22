@@ -587,7 +587,7 @@ namespace HybridCLR.Editor.DHE
             {
                 return false;
             }
-            if (e1.HandlerEnd.Offset != e2.HandlerEnd.Offset)
+            if (e1.HandlerEnd?.Offset != e2.HandlerEnd?.Offset)
             {
                 return false;
             }
@@ -600,10 +600,10 @@ namespace HybridCLR.Editor.DHE
             }
             else if (e1.HandlerType == ExceptionHandlerType.Catch)
             {
-                //if (!IsLocationLayoutEqual(e1.CatchType.ToTypeSig(), e2.CatchType.ToTypeSig()))
-                //{
-                //    return false;
-                //}
+                if (!CompareEqualTypeLayout(e1.CatchType, e2.CatchType))
+                {
+                    return false;
+                }
                 // Exception类型肯定是LocationLayoutEqual
             }
             return true;
