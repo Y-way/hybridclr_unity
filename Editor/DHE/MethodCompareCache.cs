@@ -460,7 +460,7 @@ namespace HybridCLR.Editor.DHE
                     return false;
                 }
                 // FIXME 还需要小心将il2cpp虚函数变成直接的call调用
-                if (!_proxyAOTMethod && !CompareMethodDefInternal(md1, md2, callerData))
+                if (!_proxyAOTMethod && !(md1.IsFinal || md1.DeclaringType.IsSealed) && !CompareMethodDefInternal(md1, md2, callerData))
                 {
                     return false;
                 }
@@ -493,8 +493,8 @@ namespace HybridCLR.Editor.DHE
                 md = null;
                 return false;
             }
-            md = method.ResolveMethodDefThrow();
-            return true;
+            md = method.ResolveMethodDef();
+            return md != null;
         }
 
         private bool CompareCallNotVirtualMethod(IMethod m1, IMethod m2, MethodCompareData callerMethod)
