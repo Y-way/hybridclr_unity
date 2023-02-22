@@ -128,7 +128,6 @@ namespace HybridCLR.Editor.DHE
                 t2 = t2.ResolveTypeDefThrow();
             }
             
-            
             if (t1 is TypeDef td1 && t2 is TypeDef td2)
             {
                 //Debug.Log($"CompareTypeLayout 2 {t1} {t2}");
@@ -145,45 +144,59 @@ namespace HybridCLR.Editor.DHE
             }
             if (t1 is TypeSpec ts1 && t2 is TypeSpec ts2)
             {
-                GenericInstSig gis1 = ts1.TryGetGenericInstSig();
-                GenericInstSig gis2 = ts2.TryGetGenericInstSig();
-
-                if (gis1 == null || gis2 == null)
+                ElementType eleType1 = t1.ToTypeSig().ElementType;
+                ElementType eleType2 = t1.ToTypeSig().ElementType;
+                if (eleType1 != eleType2)
                 {
                     return false;
                 }
-
-                TypeDef gt1 = gis1.GenericType.TypeDefOrRef.ResolveTypeDef();
-                TypeDef gt2 = gis2.GenericType.TypeDefOrRef.ResolveTypeDef();
-                if (!IsSameTypeAttrs(gt1, gt2))
+                switch (eleType1)
                 {
-                    return false;
-                }
-                if (gt1.IsEnum)
-                {
-                    return gt1.GetEnumUnderlyingType().ElementType == gt2.GetEnumUnderlyingType().ElementType;
-                }
-
-                if (gt1.IsValueType)
-                {
-                    if (TryGetCacheCompareResult(t1, t2, out var ret))
+                    case ElementType.GenericInst:
                     {
-                        return ret;
+                        GenericInstSig gis1 = ts1.TryGetGenericInstSig();
+                        GenericInstSig gis2 = ts2.TryGetGenericInstSig();
+
+                        if (gis1 == null || gis2 == null)
+                        {
+                            return false;
+                        }
+
+                        TypeDef gt1 = gis1.GenericType.TypeDefOrRef.ResolveTypeDef();
+                        TypeDef gt2 = gis2.GenericType.TypeDefOrRef.ResolveTypeDef();
+                        if (!IsSameTypeAttrs(gt1, gt2))
+                        {
+                            return false;
+                        }
+                        if (gt1.IsEnum)
+                        {
+                            return gt1.GetEnumUnderlyingType().ElementType == gt2.GetEnumUnderlyingType().ElementType;
+                        }
+
+                        if (gt1.IsValueType)
+                        {
+                            if (TryGetCacheCompareResult(t1, t2, out var ret))
+                            {
+                                return ret;
+                            }
+                            ret = CompareGenericInstValueTypeLayout(gis1, gis2);
+                            AddCacheCompareResult(t1, t2, ret);
+                            return ret;
+                        }
+                        else
+                        {
+                            if (TryGetCacheCompareResult(t1, t2, out var ret))
+                            {
+                                return ret;
+                            }
+                            ret = CompareGenericInstClassLayout(gis1, gis2);
+                            AddCacheCompareResult(t1, t2, ret);
+                            return ret;
+                        }
                     }
-                    ret = CompareGenericInstValueTypeLayout(gis1, gis2);
-                    AddCacheCompareResult(t1, t2, ret);
-                    return ret;
+                    default: return true;
                 }
-                else
-                {
-                    if (TryGetCacheCompareResult(t1, t2, out var ret))
-                    {
-                        return ret;
-                    }
-                    ret = CompareGenericInstClassLayout(gis1, gis2);
-                    AddCacheCompareResult(t1, t2, ret);
-                    return ret;
-                }
+                
             }
             return false;
         }
