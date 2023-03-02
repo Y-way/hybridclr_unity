@@ -86,13 +86,7 @@ namespace HybridCLR.Editor
 
         public static List<string> HotUpdateAssemblyFiles => HotUpdateAssemblyNames.Select(dll => dll + ".dll").ToList();
 
-        public static List<string> HotUpdateAndDHEAssemblyNames
-        {
-            get
-            {
-                return HotUpdateAssemblyNames.Concat(HybridCLRSettings.Instance.differentialHybridAssemblies ?? Array.Empty<string>()).ToList();
-            }
-        }
+        public static List<string> HotUpdateAndDHEAssemblyNames => HotUpdateAssemblyNames.Concat(HybridCLRSettings.Instance.differentialHybridAssemblies ?? Array.Empty<string>()).ToList();
 
         public static List<string> PatchingHotUpdateAssemblyFiles
         {
@@ -116,6 +110,8 @@ namespace HybridCLR.Editor
                 return patchingList;
             }
         }
+
+        public static List<string> DifferentialHybridAssemblyNames => HybridCLRSettings.Instance.differentialHybridAssemblies.ToList();
 
         public static HybridCLRSettings HybridCLRSettings => HybridCLRSettings.Instance;
     }

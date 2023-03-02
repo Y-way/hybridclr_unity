@@ -13,6 +13,7 @@ namespace HybridCLR.Editor.Meta
     {
         private readonly IAssemblyResolver _assemblyPathResolver;
         private readonly List<string> _rootAssemblies;
+        private readonly List<string> _preserveAssemblies;
 
         private readonly ModuleContext _modCtx;
         private readonly AssemblyResolver _asmResolver;
@@ -35,10 +36,11 @@ namespace HybridCLR.Editor.Meta
             return _rootAssemblies.Select(ass => LoadedModules[ass]).ToList();
         }
 
-        public AssemblyReferenceDeepCollector(IAssemblyResolver assemblyResolver, List<string> rootAssemblies)
+        public AssemblyReferenceDeepCollector(IAssemblyResolver assemblyResolver, List<string> rootAssemblies, List<string> preserveAssemblies)
         {
             _assemblyPathResolver = assemblyResolver;
             _rootAssemblies = rootAssemblies;
+            _preserveAssemblies = preserveAssemblies;
             _modCtx = ModuleDef.CreateModuleContext();
             _asmResolver = (AssemblyResolver)_modCtx.AssemblyResolver;
             _asmResolver.EnableTypeDefCache = true;
@@ -51,6 +53,10 @@ namespace HybridCLR.Editor.Meta
             foreach (var asm in _rootAssemblies)
             {
                 LoadModule(asm);
+            }
+            foreach (var ass in _preserveAssemblies)
+            {
+                LoadModule(ass);
             }
         }
 

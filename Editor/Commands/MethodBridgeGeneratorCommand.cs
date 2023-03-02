@@ -54,8 +54,11 @@ namespace HybridCLR.Editor.Commands
 
         public static void GenerateMethodBridge(BuildTarget target)
         {
-            List<string> hotUpdateDllNames = SettingsUtil.HotUpdateAndDHEAssemblyNames;
-            using (AssemblyReferenceDeepCollector collector = new AssemblyReferenceDeepCollector(MetaUtil.CreateHotUpdateAndAOTAssemblyResolver(target, hotUpdateDllNames), hotUpdateDllNames))
+            List<string> hotUpdateAssNames = SettingsUtil.HotUpdateAssemblyNames;
+            List<string> dheAssNames = SettingsUtil.DifferentialHybridAssemblyNames;
+            List<string> hotUpdateAndDHEAssNames = SettingsUtil.HotUpdateAndDHEAssemblyNames;
+            using (AssemblyReferenceDeepCollector collector = new AssemblyReferenceDeepCollector
+                (MetaUtil.CreateHotUpdateAndAOTAssemblyResolver(target, hotUpdateAndDHEAssNames), hotUpdateAssNames, dheAssNames))
             {
                 var analyzer = new Analyzer(new Analyzer.Options
                 {
